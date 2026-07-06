@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Skin Lesion Analyzer - Real Time</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Real-time AI skin lesion screening support tool using TensorFlow.js." />
+
+  <link rel="stylesheet" href="css/realtime-skin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+</head>
+
+<body>
+  <main class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">AI</div>
+        <div>
+          <h1>Skin Lesion Analyzer</h1>
+          <p>Real-Time AI Screening</p>
+        </div>
+      </div>
+
+      <div class="status-card">
+        <span id="modelDot" class="dot offline"></span>
+        <div>
+          <strong id="modelStatus">Loading model...</strong>
+          <small id="modelSubStatus">TensorFlow.js initialization</small>
+        </div>
+      </div>
+
+      <nav>
+        <a href="#analyzer">Analyzer</a>
+        <a href="#camera">Camera</a>
+        <a href="#history">History</a>
+        <a href="#guide">Guide</a>
+      </nav>
+
+      <div class="warning-box">
+        <strong>Medical disclaimer</strong>
+        <p>This is a screening-support demo only. It is not a final diagnosis. Consult a dermatologist/pathologist.</p>
+      </div>
+    </aside>
+
+    <section class="content">
+      <header class="hero">
+        <p class="eyebrow">TensorFlow.js + Browser AI + Realtime UI</p>
+        <h2>Analyze skin lesion images instantly with live confidence, top-3 classes, camera input, and local history.</h2>
+      </header>
+
+      <section id="analyzer" class="grid">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Upload</p>
+              <h3>Analyze Images</h3>
+            </div>
+            <button onclick="resetDashboard()" class="ghost-btn">Reset</button>
+          </div>
+
+          <div id="dropZone" class="drop-zone">
+            <input id="imageInput" type="file" accept="image/png,image/jpeg,image/jpg" multiple hidden />
+            <div class="upload-icon">+</div>
+            <h4>Drop JPG/PNG images here</h4>
+            <p>or click to select single/multiple lesion images</p>
+          </div>
+
+          <div class="preview-wrap">
+            <img id="selectedImage" src="assets/samplepic.svg" alt="Selected lesion image" />
+          </div>
+
+          <div class="button-row">
+            <button id="analyzeBtn" onclick="analyzeSelectedFiles()" class="primary-btn">Analyze Selected Images</button>
+            <button onclick="exportHistoryCSV()" class="ghost-btn">Export CSV</button>
+          </div>
+        </div>
+
+        <div class="panel result-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Result</p>
+              <h3>Live Prediction</h3>
+            </div>
+            <span id="latencyBadge" class="badge">0 ms</span>
+          </div>
+
+          <div id="riskCard" class="risk-card neutral">
+            <span>Waiting for image</span>
+            <strong>No prediction yet</strong>
+            <p>Upload an image or use the camera to start analysis.</p>
+          </div>
+
+          <div id="resultList" class="result-list"></div>
+        </div>
+      </section>
+
+      <section id="camera" class="grid">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Camera</p>
+              <h3>Realtime Camera Capture</h3>
+            </div>
+          </div>
+
+          <video id="cameraVideo" autoplay playsinline muted></video>
+
+          <div class="button-row">
+            <button onclick="startCamera()" class="primary-btn">Start Camera</button>
+            <button onclick="captureAndAnalyze()" class="ghost-btn">Capture & Analyze</button>
+            <button onclick="stopCamera()" class="danger-btn">Stop Camera</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Live Stats</p>
+              <h3>Session Analytics</h3>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat">
+              <span>Total Scans</span>
+              <strong id="totalScans">0</strong>
+            </div>
+            <div class="stat">
+              <span>High Attention</span>
+              <strong id="highRiskScans">0</strong>
+            </div>
+            <div class="stat">
+              <span>Avg Confidence</span>
+              <strong id="avgConfidence">0%</strong>
+            </div>
+          </div>
+
+          <canvas id="trendCanvas" width="600" height="260"></canvas>
+        </div>
+      </section>
+
+      <section id="history" class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Local Browser Storage</p>
+            <h3>Prediction History</h3>
+          </div>
+          <div class="button-row">
+            <button onclick="renderHistory()" class="ghost-btn">Refresh</button>
+            <button onclick="clearHistory()" class="danger-btn">Clear History</button>
+          </div>
+        </div>
+
+        <div id="historyGrid" class="history-grid"></div>
+      </section>
+
+      <section id="guide" class="panel guide">
+        <p class="eyebrow">Class Labels</p>
+        <h3>What the 7 classes mean</h3>
+        <div class="class-grid" id="classGuide"></div>
+      </section>
+    </section>
+  </main>
+
+  <canvas id="hiddenCanvas" width="224" height="224" hidden></canvas>
+
+  <script src="jscript/realtime-skin-app.js"></script>
+</body>
+</html>
